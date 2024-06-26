@@ -1,6 +1,7 @@
-name: nagios-plugins-storage
+name: nagios-plugins-s3
 channels:
  - conda-forge
+ - anaconda
 dependencies:
  - pip
  - boto3
