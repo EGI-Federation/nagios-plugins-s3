@@ -199,7 +199,6 @@ def metricDel(args, io):
                 "problem invoking delete(): %s:%s" % (str(e), sys.exc_info()[0]),
             )
 
-
 @app.metric(seq=5, metric_name="All", passive=False)
 def metricAlll(args, io):
     """Active metric to combine the result from the previous passive ones"""
