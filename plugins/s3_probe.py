@@ -8,7 +8,6 @@ EGI S3 Storage probe
 
 """
 
-import datetime
 import filecmp
 import shutil
 import sys
@@ -16,7 +15,6 @@ import tempfile
 import time
 import uuid
 import boto3
-import botocore
 import nap.core
 
 PROBE_VERSION = "v0.0.1"
@@ -107,10 +105,9 @@ def metricPut(args, io):
     # generate source file
     try:
         src_file = _fileTest
-        fp = open(src_file, "w")
-        for s in "1234567890":
-            fp.write(s + "\n")
-        fp.close()
+        with open(src_file, "w") as fp:
+            for s in "1234567890":
+                fp.write(s + "\n")
 
         fn = _filePattern % (str(int(time.time())), str(uuid.uuid1()))
 
@@ -159,6 +156,11 @@ def metricGet(args, io):
         stMsg = "File was copied from the S3 Storage."
         try:
             app.s3_resource.Bucket(app.s3_bucket_name).download_file(src_filename,dest_file)
+            
+            if not filecmp.cmp(_fileTest, dest_file):
+                io.set_status(nap.CRITICAL, "Downloaded file content does not match uploaded file")
+                return
+
             io.summary = stMsg
             io.status = nap.OK
         except Exception as e:
@@ -200,7 +202,7 @@ def metricDel(args, io):
             )
 
 @app.metric(seq=5, metric_name="All", passive=False)
-def metricAlll(args, io):
+def metricAll(args, io):
     """Active metric to combine the result from the previous passive ones"""
 
     results = app.metric_results()
